@@ -93,6 +93,19 @@ local level, exp, progress = levelSystem:getExpProgress()
 ✅ **Value Bounds** - All values have min/max limits to prevent exploits
 ✅ **AutoSave** - Player data automatically saved every 60 seconds
 
+## ⚙️ Admin Panel
+
+There is a very small admin panel UI you can add to `StarterGui` to toggle systems globally.
+
+- Only the game creator (owner) can see and use the panel by default.
+- The panel sends `AdminToggle` RemoteEvent to the server which flips `ReplicatedStorage/Settings/*Enabled` BoolValues.
+
+To enable the admin UI:
+1. Place `RobloxSystems/StarterGui/AdminPanel.lua` into your game's `StarterGui` as a LocalScript.
+2. In-game the creator will see a small panel in the top-left to toggle `Health`, `Inventory`, and `Leveling`.
+
+The server validates who can toggle settings, and modules check these BoolValues before performing operations.
+
 ## 📝 Valid Items (Inventory)
 
 Edit these in `InventorySystem.lua`:

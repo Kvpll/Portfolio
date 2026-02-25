@@ -6,75 +6,53 @@
 	- Integrates with PlayerDataManager
 ]]
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
 local LevelSystem = {}
 LevelSystem.__index = LevelSystem
 
--- Experience curve: exp needed = level * 100
-local function getExpNeeded(level)
-	return level * 100
+local function expNeeded(level)
+	return (level or 1) * 100
 end
 
-function LevelSystem.new(playerDataManager)
+function LevelSystem.new(dataManager)
 	local self = setmetatable({}, LevelSystem)
-	self.playerDataManager = playerDataManager
-	self.player = playerDataManager.player
-	
+	self.dataManager = dataManager
+	self.player = dataManager.player
 	return self
 end
 
 function LevelSystem:addExperience(amount)
-	-- Validate on server only
-	if type(amount) ~= "number" or amount < 0 or amount > 5000 then
-		warn("Invalid experience amount from " .. self.player.Name .. ": " .. tostring(amount))
-		return false
-	end
-	
-	if not self.playerDataManager:addExperience(amount) then
-		return false
-	end
-	
-	-- Check for level ups
+	amount = tonumber(amount) or 0
+	if amount <= 0 then return false end
+	if not self.dataManager:addExperience(amount) then return false end
 	self:checkLevelUp()
 	return true
 end
 
 function LevelSystem:checkLevelUp()
-	local data = self.playerDataManager:getData()
-	local expNeeded = getExpNeeded(data.level)
-	
-	while data.experience >= expNeeded do
-		data.experience = data.experience - expNeeded
-		self.playerDataManager:levelUp()
-		self:notifyLevelUp(data.level)
-		expNeeded = getExpNeeded(data.level)
+	local data = self.dataManager:getData()
+	local needed = expNeeded(data.level)
+	while data.experience >= needed do
+		data.experience = data.experience - needed
+		self.dataManager:levelUp()
+		ReplicatedStorage:WaitForChild("Events"):WaitForChild("LevelUp"):FireAllClients(self.player, data.level)
+		needed = expNeeded(data.level)
 	end
 end
 
 function LevelSystem:getLevel()
-	return self.playerDataManager:getData().level
+	return self.dataManager:getData().level
 end
 
 function LevelSystem:getExperience()
-	return self.playerDataManager:getData().experience
+	return self.dataManager:getData().experience
 end
 
-function LevelSystem:getExpNeeded()
-	return getExpNeeded(self:getLevel())
-end
-
-function LevelSystem:getExpProgress()
-	local current = self:getExperience()
-	local needed = self:getExpNeeded()
-	return current, needed, (current / needed) * 100
-end
-
-function LevelSystem:notifyLevelUp(newLevel)
-	print(self.player.Name .. " reached level " .. newLevel)
-	
-	game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("LevelUp"):FireAllClients(
-		self.player,
-		newLevel
-	)
+function LevelSystem:getProgress()
+	local d = self.dataManager:getData()
+	local needed = expNeeded(d.level)
+	return d.experience, needed, (d.experience / needed) * 100
 end
 
 return LevelSystem

@@ -37,21 +37,37 @@ local function setupEvents()
 	local events = ReplicatedStorage:FindFirstChild("Events") or Instance.new("Folder")
 	events.Name = "Events"
 	events.Parent = ReplicatedStorage
-	
+
 	local eventNames = {
 		"HealthChanged",
 		"PlayerDied",
 		"PlayerRevived",
 		"InventoryUpdated",
 		"PlayerDataUpdated",
-		"LevelUp"
+		"LevelUp",
+		"AdminToggle"
 	}
-	
+
 	for _, eventName in ipairs(eventNames) do
 		if not events:FindFirstChild(eventName) then
 			local event = Instance.new("RemoteEvent")
 			event.Name = eventName
 			event.Parent = events
+		end
+	end
+
+	-- Settings folder for admin toggles
+	local settings = ReplicatedStorage:FindFirstChild("Settings") or Instance.new("Folder")
+	settings.Name = "Settings"
+	settings.Parent = ReplicatedStorage
+
+	local bools = {HealthEnabled = true, InventoryEnabled = true, LevelingEnabled = true}
+	for name, default in pairs(bools) do
+		if not settings:FindFirstChild(name) then
+			local b = Instance.new("BoolValue")
+			b.Name = name
+			b.Value = default
+			b.Parent = settings
 		end
 	end
 end
@@ -108,9 +124,29 @@ end
 -- Server-side remote handlers (prevent exploits by validating everything)
 local function setupRemoteHandlers()
 	local events = ReplicatedStorage:WaitForChild("Events")
-	
-	-- Example: Only server can damage players (prevent client exploits)
-	-- This would be called from your game logic, not from client
+
+	-- Admin toggle handler (only allow game creator or listed admins)
+	local admins = {}
+	local function isAdmin(player)
+		if not player then return false end
+		if player.UserId == game.CreatorId then return true end
+		-- add admin UserIds to the `admins` table if needed
+		return table.find(admins, player.UserId) ~= nil
+	end
+
+	events.AdminToggle.OnServerEvent:Connect(function(player, systemName, enabled)
+		if not isAdmin(player) then return end
+		local settings = ReplicatedStorage:FindFirstChild("Settings")
+		if not settings then return end
+		if systemName == "Health" then
+			settings.HealthEnabled.Value = enabled
+		elseif systemName == "Inventory" then
+			settings.InventoryEnabled.Value = enabled
+		elseif systemName == "Leveling" then
+			settings.LevelingEnabled.Value = enabled
+		end
+		print("Admin " .. player.Name .. " set " .. tostring(systemName) .. " to " .. tostring(enabled))
+	end)
 end
 
 -- Setup
