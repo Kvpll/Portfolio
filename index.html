@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kvpll - Roblox Scripting Portfolio</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">Kvpll</div>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#code">Code Snippets</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Kvpll</h1>
+            <p class="subtitle">Roblox Scripting Portfolio</p>
+            <p class="description">2+ years of experience creating clean, human-written scripts for Roblox. Transitioning from game mechanics to legitimate development opportunities.</p>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2>About Me</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>I'm a Roblox scripter with 2+ years of hands-on experience in Lua scripting. I started my journey exploring game mechanics and scripting techniques, and I'm now focused on creating legitimate, production-quality code for games and applications.</p>
+                    <p>My scripts prioritize clean code architecture, readability, and best practices—writing code the way professional developers do. I'm experienced in:</p>
+                    <ul class="skills-list">
+                        <li>Lua scripting for Roblox</li>
+                        <li>Game mechanics development</li>
+                        <li>Server and client scripting</li>
+                        <li>API integration and networking</li>
+                        <li>Object-oriented programming patterns</li>
+                        <li>Performance optimization</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="projects">
+        <div class="container">
+            <h2>Projects & Portfolio</h2>
+            <div class="projects-grid">
+                <!-- Project Card Template -->
+                <div class="project-card">
+                    <div class="project-media">
+                        <img src="https://via.placeholder.com/400x250?text=Project+1" alt="Project 1">
+                    </div>
+                    <div class="project-info">
+                        <h3>Game Mechanic System</h3>
+                        <p>A comprehensive game mechanic system featuring player progression, combat systems, and item management.</p>
+                        <div class="project-tags">
+                            <span class="tag">Lua</span>
+                            <span class="tag">Game Design</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-media">
+                        <img src="https://via.placeholder.com/400x250?text=Project+2" alt="Project 2">
+                    </div>
+                    <div class="project-info">
+                        <h3>API Integration Module</h3>
+                        <p>Efficient HTTP request handling and data management module for connecting Roblox games with external services.</p>
+                        <div class="project-tags">
+                            <span class="tag">API</span>
+                            <span class="tag">Networking</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-media">
+                        <img src="https://via.placeholder.com/400x250?text=Project+3" alt="Project 3">
+                    </div>
+                    <div class="project-info">
+                        <h3>UI Framework</h3>
+                        <p>Custom UI framework for creating responsive and interactive user interfaces in Roblox games.</p>
+                        <div class="project-tags">
+                            <span class="tag">UI/UX</span>
+                            <span class="tag">Framework</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-media">
+                        <img src="https://via.placeholder.com/400x250?text=Project+4" alt="Project 4">
+                    </div>
+                    <div class="project-info">
+                        <h3>Database Manager</h3>
+                        <p>Robust data persistence system with encryption and backup features for player data management.</p>
+                        <div class="project-tags">
+                            <span class="tag">Database</span>
+                            <span class="tag">Security</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Code Snippets Section -->
+    <section id="code" class="code-snippets">
+        <div class="container">
+            <h2>Code Snippets</h2>
+            <div class="snippets-grid">
+                <div class="code-card">
+                    <h3>Module System</h3>
+                    <pre><code>local Module = {}
+
+function Module:new()
+    local self = setmetatable({}, { __index = Module })
+    self.data = {}
+    return self
+end
+
+function Module:initialize()
+    print("Module initialized")
+end
+
+return Module</code></pre>
+                </div>
+
+                <div class="code-card">
+                    <h3>Event Handler</h3>
+                    <pre><code>local EventManager = {}
+
+function EventManager:create(eventName)
+    self[eventName] = {}
+    return function(callback)
+        table.insert(self[eventName], callback)
+    end
+end
+
+function EventManager:fire(eventName, ...)
+    for _, callback in ipairs(self[eventName] or {}) do
+        callback(...)
+    end
+end
+
+return EventManager</code></pre>
+                </div>
+
+                <div class="code-card">
+                    <h3>Class Pattern</h3>
+                    <pre><code>local Player = {}
+Player.__index = Player
+
+function Player.new(name, level)
+    local self = setmetatable({}, Player)
+    self.name = name
+    self.level = level or 1
+    return self
+end
+
+function Player:levelUp()
+    self.level = self.level + 1
+end
+
+return Player</code></pre>
+                </div>
+
+                <div class="code-card">
+                    <h3>Utility Function</h3>
+                    <pre><code>local function deepCopy(original)
+    local copy = {}
+    for key, value in pairs(original) do
+        if type(value) == "table" then
+            copy[key] = deepCopy(value)
+        else
+            copy[key] = value
+        end
+    end
+    return copy
+end
+
+return deepCopy</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2>Get in Touch</h2>
+            <p class="contact-intro">Interested in collaborating or have a project in mind? Connect with me on any of these platforms.</p>
+            
+            <div class="social-links">
+                <a href="https://discord.com/users/YOUR_DISCORD_ID" class="social-btn discord" title="Discord">
+                    <span class="icon">💬</span>
+                    <span>Discord</span>
+                </a>
+                <a href="https://t.me/YOUR_TELEGRAM_USERNAME" class="social-btn telegram" title="Telegram">
+                    <span class="icon">✈️</span>
+                    <span>Telegram</span>
+                </a>
+                <a href="https://www.roblox.com/users/0/profile" class="social-btn roblox" title="Roblox">
+                    <span class="icon">🎮</span>
+                    <span>Roblox Profile</span>
+                </a>
+                <a href="https://github.com/Kvpll" class="social-btn github" title="GitHub">
+                    <span class="icon">💻</span>
+                    <span>GitHub</span>
+                </a>
+            </div>
+
+            <div class="contact-info">
+                <p><strong>Email:</strong> your.email@example.com</p>
+                <p><strong>Username:</strong> Kvpll</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Kvpll. All rights reserved.</p>
+            <p>Crafted with clean, human-written code.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
