@@ -25,7 +25,7 @@
         <div class="hero-content">
             <h1>Kvpll</h1>
             <p class="subtitle">Roblox Scripting Portfolio</p>
-            <p class="description">2+ years of experience creating clean, human-written scripts for Roblox. Transitioning from game mechanics to legitimate development opportunities.</p>
+            <p class="description">2+ years of experience building games in Roblox Studio. Specializing in clean, readable Lua code for game systems, UI design, and player management.</p>
         </div>
     </section>
 
@@ -35,15 +35,15 @@
             <h2>About Me</h2>
             <div class="about-content">
                 <div class="about-text">
-                    <p>I'm a Roblox scripter with 2+ years of hands-on experience in Lua scripting. I started my journey exploring game mechanics and scripting techniques, and I'm now focused on creating legitimate, production-quality code for games and applications.</p>
-                    <p>My scripts prioritize clean code architecture, readability, and best practices—writing code the way professional developers do. I'm experienced in:</p>
+                    <p>I'm a Roblox Studio developer with 2+ years of hands-on experience building games and systems in Lua. I specialize in creating clean, reusable code for game mechanics, UI systems, and player management. My focus is on writing code the way professional game developers do—readable, efficient, and maintainable.</p>
+                    <p>My experience in Roblox Studio includes:</p>
                     <ul class="skills-list">
-                        <li>Lua scripting for Roblox</li>
-                        <li>Game mechanics development</li>
-                        <li>Server and client scripting</li>
-                        <li>API integration and networking</li>
-                        <li>Object-oriented programming patterns</li>
-                        <li>Performance optimization</li>
+                        <li>UI Design & Implementation with IntGui</li>
+                        <li>Game Mechanics (combat, inventory, leveling)</li>
+                        <li>Server & Client Architecture</li>
+                        <li>Player Data Systems & Datastores</li>
+                        <li>Event-Driven Programming</li>
+                        <li>Module-Based Code Organization</li>
                     </ul>
                 </div>
             </div>
@@ -58,56 +58,56 @@
                 <!-- Project Card Template -->
                 <div class="project-card">
                     <div class="project-media">
-                        <img src="https://via.placeholder.com/400x250?text=Project+1" alt="Project 1">
+                        <img src="https://via.placeholder.com/400x250?text=Inventory+System" alt="Inventory System">
                     </div>
                     <div class="project-info">
-                        <h3>Game Mechanic System</h3>
-                        <p>A comprehensive game mechanic system featuring player progression, combat systems, and item management.</p>
+                        <h3>Inventory Management System</h3>
+                        <p>Complete inventory system with item slots, drag-and-drop UI, item usage, and storage management. Includes server-side validation and item limit systems.</p>
                         <div class="project-tags">
-                            <span class="tag">Lua</span>
-                            <span class="tag">Game Design</span>
+                            <span class="tag">Roblox Studio</span>
+                            <span class="tag">UI Systems</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="project-card">
                     <div class="project-media">
-                        <img src="https://via.placeholder.com/400x250?text=Project+2" alt="Project 2">
+                        <img src="https://via.placeholder.com/400x250?text=Combat+System" alt="Combat System">
                     </div>
                     <div class="project-info">
-                        <h3>API Integration Module</h3>
-                        <p>Efficient HTTP request handling and data management module for connecting Roblox games with external services.</p>
+                        <h3>Combat & Health System</h3>
+                        <p>RPG-style combat system with damage calculation, armor, knockback, health bars, and death handling. Includes client prediction and server authority.</p>
                         <div class="project-tags">
-                            <span class="tag">API</span>
-                            <span class="tag">Networking</span>
+                            <span class="tag">Game Mechanics</span>
+                            <span class="tag">Server/Client</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="project-card">
                     <div class="project-media">
-                        <img src="https://via.placeholder.com/400x250?text=Project+3" alt="Project 3">
+                        <img src="https://via.placeholder.com/400x250?text=Player+Stats" alt="Player Stats">
                     </div>
                     <div class="project-info">
-                        <h3>UI Framework</h3>
-                        <p>Custom UI framework for creating responsive and interactive user interfaces in Roblox games.</p>
+                        <h3>Player Stats & Leveling</h3>
+                        <p>Character stat system with experience tracking, level progression, stat bonuses, and skill trees. Persists data using Datastores with error handling.</p>
                         <div class="project-tags">
-                            <span class="tag">UI/UX</span>
-                            <span class="tag">Framework</span>
+                            <span class="tag">Player Data</span>
+                            <span class="tag">Datastores</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="project-card">
                     <div class="project-media">
-                        <img src="https://via.placeholder.com/400x250?text=Project+4" alt="Project 4">
+                        <img src="https://via.placeholder.com/400x250?text=Menu+UI" alt="Menu UI">
                     </div>
                     <div class="project-info">
-                        <h3>Database Manager</h3>
-                        <p>Robust data persistence system with encryption and backup features for player data management.</p>
+                        <h3>Interactive Menu UI</h3>
+                        <p>Professional menu interface with settings, character selection, shop systems, and settings persistence. Responsive design with animation and transitions.</p>
                         <div class="project-tags">
-                            <span class="tag">Database</span>
-                            <span class="tag">Security</span>
+                            <span class="tag">IntGui</span>
+                            <span class="tag">UX Design</span>
                         </div>
                     </div>
                 </div>
@@ -121,76 +121,143 @@
             <h2>Code Snippets</h2>
             <div class="snippets-grid">
                 <div class="code-card">
-                    <h3>Module System</h3>
-                    <pre><code>local Module = {}
+                    <h3>Player Health System</h3>
+                    <pre><code>local HealthModule = {}
+HealthModule.__index = HealthModule
 
-function Module:new()
-    local self = setmetatable({}, { __index = Module })
-    self.data = {}
+function HealthModule.new(player, maxHealth)
+    local self = setmetatable({}, HealthModule)
+    self.player = player
+    self.maxHealth = maxHealth
+    self.currentHealth = maxHealth
+    self.healthChanged = Instance.new("BindableEvent")
     return self
 end
 
-function Module:initialize()
-    print("Module initialized")
-end
-
-return Module</code></pre>
-                </div>
-
-                <div class="code-card">
-                    <h3>Event Handler</h3>
-                    <pre><code>local EventManager = {}
-
-function EventManager:create(eventName)
-    self[eventName] = {}
-    return function(callback)
-        table.insert(self[eventName], callback)
+function HealthModule:takeDamage(amount, damageType)
+    self.currentHealth = math.max(0, self.currentHealth - amount)
+    self.healthChanged:Fire(self.currentHealth, self.maxHealth)
+    if self.currentHealth <= 0 then
+        self:die(damageType)
     end
 end
 
-function EventManager:fire(eventName, ...)
-    for _, callback in ipairs(self[eventName] or {}) do
-        callback(...)
-    end
+function HealthModule:heal(amount)
+    self.currentHealth = math.min(self.maxHealth, self.currentHealth + amount)
+    self.healthChanged:Fire(self.currentHealth, self.maxHealth)
 end
 
-return EventManager</code></pre>
+function HealthModule:die(damageType)
+    print(self.player.Name .. " died from " .. (damageType or "unknown"))
+end
+
+return HealthModule</code></pre>
                 </div>
 
                 <div class="code-card">
-                    <h3>Class Pattern</h3>
-                    <pre><code>local Player = {}
-Player.__index = Player
+                    <h3>Inventory System</h3>
+                    <pre><code>local Inventory = {}
+Inventory.__index = Inventory
 
-function Player.new(name, level)
-    local self = setmetatable({}, Player)
-    self.name = name
-    self.level = level or 1
+function Inventory.new(maxSlots)
+    local self = setmetatable({}, Inventory)
+    self.slots = {}
+    self.maxSlots = maxSlots
+    self.itemAdded = Instance.new("BindableEvent")
+    for i = 1, maxSlots do
+        self.slots[i] = nil
+    end
     return self
 end
 
-function Player:levelUp()
-    self.level = self.level + 1
-end
-
-return Player</code></pre>
-                </div>
-
-                <div class="code-card">
-                    <h3>Utility Function</h3>
-                    <pre><code>local function deepCopy(original)
-    local copy = {}
-    for key, value in pairs(original) do
-        if type(value) == "table" then
-            copy[key] = deepCopy(value)
-        else
-            copy[key] = value
+function Inventory:addItem(itemId, quantity)
+    for i, slot in ipairs(self.slots) do
+        if slot and slot.id == itemId then
+            slot.quantity = slot.quantity + quantity
+            self.itemAdded:Fire(i, slot)
+            return true
         end
     end
-    return copy
+    for i, slot in ipairs(self.slots) do
+        if not slot then
+            self.slots[i] = {id = itemId, quantity = quantity}
+            self.itemAdded:Fire(i, self.slots[i])
+            return true
+        end
+    end
+    return false
 end
 
-return deepCopy</code></pre>
+return Inventory</code></pre>
+                </div>
+
+                <div class="code-card">
+                    <h3>Player Data Manager</h3>
+                    <pre><code>local PlayerData = {}
+PlayerData.__index = PlayerData
+
+function PlayerData.new(player, datastore)
+    local self = setmetatable({}, PlayerData)
+    self.player = player
+    self.datastore = datastore
+    self.data = {
+        level = 1,
+        experience = 0,
+        coins = 0,
+        inventory = {}
+    }
+    return self
+end
+
+function PlayerData:load()
+    local success, data = pcall(function()
+        return self.datastore:GetAsync("player_" .. self.player.UserId)
+    end)
+    if success and data then
+        self.data = data
+    end
+end
+
+function PlayerData:save()
+    local success = pcall(function()
+        self.datastore:SetAsync("player_" .. self.player.UserId, self.data)
+    end)
+    return success
+end
+
+return PlayerData</code></pre>
+                </div>
+
+                <div class="code-card">
+                    <h3>Experience & Leveling</h3>
+                    <pre><code>local LevelSystem = {}
+LevelSystem.__index = LevelSystem
+
+function LevelSystem.new(player)
+    local self = setmetatable({}, LevelSystem)
+    self.player = player
+    self.level = 1
+    self.experience = 0
+    self.levelChanged = Instance.new("BindableEvent")
+    return self
+end
+
+function LevelSystem:addExperience(amount)
+    self.experience = self.experience + amount
+    local expNeeded = self.level * 100
+    while self.experience >= expNeeded do
+        self.experience = self.experience - expNeeded
+        self:levelUp()
+    end
+end
+
+function LevelSystem:levelUp()
+    self.level = self.level + 1
+    self.levelChanged:Fire(self.level)
+    print(self.player.Name .. " is now level " .. self.level)
+end
+
+return LevelSystem</code></pre>
                 </div>
             </div>
         </div>
