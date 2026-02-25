@@ -12,10 +12,21 @@
 	local activeHealth = {}
 
 	-- Helper: check whether health system is enabled globally
-	local function isHealthEnabled()
+	local function isHealthEnabled(self)
 		local settings = ReplicatedStorage:FindFirstChild("Settings")
-		if settings and settings:FindFirstChild("HealthEnabled") then
-			return settings.HealthEnabled.Value
+		if settings then
+			-- check per-player override first
+			local per = settings:FindFirstChild("PerPlayer")
+			if per then
+				local pid = per:FindFirstChild(tostring(self.player.UserId))
+				if pid then
+					local v = pid:FindFirstChild("HealthEnabled")
+					if v then return v.Value end
+				end
+			end
+			if settings:FindFirstChild("HealthEnabled") then
+				return settings.HealthEnabled.Value
+			end
 		end
 		return true
 	end
@@ -32,7 +43,7 @@
 	end
 
 	function HealthSystem:takeDamage(amount, damageType)
-		if not isHealthEnabled() then
+		if not isHealthEnabled(self) then
 			return false -- health disabled by admin
 		end
 
@@ -57,7 +68,7 @@
 	end
 
 	function HealthSystem:heal(amount)
-		if not isHealthEnabled() then
+		if not isHealthEnabled(self) then
 			return false
 		end
 		amount = tonumber(amount) or 0

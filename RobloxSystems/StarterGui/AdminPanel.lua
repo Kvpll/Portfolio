@@ -5,6 +5,14 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 
+-- Top-level config: change labels/defaults here
+local UI_CONFIG = {
+    InventoryDefault = 3,
+    DamageDefault = 10,
+    HealDefault = 10,
+    ShowAdminListBox = true,
+}
+
 local function isAdmin()
     return player.UserId == game.CreatorId
 end
@@ -122,20 +130,34 @@ end
 
 -- Inventory slots control
 local invLabel = createLabel("Inventory Slots:", frame, 140)
-local invInput = createInput(3, frame, 140)
-local invSet = createButton("Set Slots", frame, 170)
+local invInput = createInput(UI_CONFIG.InventoryDefault, frame, 140)
+local invDec = createButton("-", frame, 170)
+local invInc = createButton("+", frame, 170)
+local invSet = createButton("Apply Slots", frame, 170)
+invDec.Text = "-"
+invInc.Text = "+"
+invDec.MouseButton1Click:Connect(function()
+    local v = tonumber(invInput.Text) or UI_CONFIG.InventoryDefault
+    v = math.max(1, v - 1)
+    invInput.Text = tostring(v)
+end)
+invInc.MouseButton1Click:Connect(function()
+    local v = tonumber(invInput.Text) or UI_CONFIG.InventoryDefault
+    v = v + 1
+    invInput.Text = tostring(v)
+end)
 invSet.MouseButton1Click:Connect(function()
-    local v = tonumber(invInput.Text) or 3
+    local v = tonumber(invInput.Text) or UI_CONFIG.InventoryDefault
     ReplicatedStorage:WaitForChild("Events"):WaitForChild("AdminSetValue"):FireServer("InventorySlots", math.max(1, math.floor(v)))
 end)
 
 -- Damage/Heal controls
 local dmgLabel = createLabel("Damage:", frame, 210)
-local dmgInput = createInput(10, frame, 210)
+local dmgInput = createInput(UI_CONFIG.DamageDefault, frame, 210)
 local dmgBtn = createButton("Damage Player", frame, 240)
 
 local healLabel = createLabel("Heal:", frame, 280)
-local healInput = createInput(10, frame, 280)
+local healInput = createInput(UI_CONFIG.HealDefault, frame, 280)
 local healBtn = createButton("Heal Player", frame, 310)
 
 local targetLabel = createLabel("Target (name or id):", frame, 350)
@@ -162,3 +184,42 @@ lvlBtn.MouseButton1Click:Connect(function()
     local target = targetInput.Text
     ReplicatedStorage:WaitForChild("Events"):WaitForChild("AdminAction"):FireServer("SetLevel", target, amount)
 end)
+
+-- Player dropdown UI
+local function openPlayerList()
+    local list = Instance.new("Frame")
+    list.Size = UDim2.new(0, 200, 0, 200)
+    list.Position = UDim2.new(0, 240, 0, 10)
+    list.BackgroundColor3 = Color3.fromRGB(35,35,35)
+    list.Parent = screen
+
+    local y = 0
+    for _, p in ipairs(Players:GetPlayers()) do
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(1, -10, 0, 30)
+        b.Position = UDim2.new(0, 5, 0, y)
+        b.Text = p.Name .. " (" .. tostring(p.UserId) .. ")"
+        b.BackgroundColor3 = Color3.fromRGB(60,60,60)
+        b.TextColor3 = Color3.fromRGB(255,255,255)
+        b.Parent = list
+        b.MouseButton1Click:Connect(function()
+            targetInput.Text = tostring(p.Name)
+            list:Destroy()
+        end)
+        y = y + 32
+    end
+end
+
+local pickBtn = createButton("Pick Player", frame, 450)
+pickBtn.MouseButton1Click:Connect(openPlayerList)
+
+-- Admin list editing (comma-separated userIds)
+if UI_CONFIG.ShowAdminListBox then
+    local adminLabel = createLabel("Admin IDs (csv):", frame, 490)
+    local adminInput = createInput("", frame, 490)
+    local adminSet = createButton("Set Admins", frame, 520)
+    adminSet.MouseButton1Click:Connect(function()
+        local csv = adminInput.Text
+        ReplicatedStorage:WaitForChild("Events"):WaitForChild("AdminSetAdmins"):FireServer(csv)
+    end)
+end

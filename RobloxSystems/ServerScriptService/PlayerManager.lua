@@ -23,6 +23,14 @@ local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+-- CONFIG: easy-to-change values at top of the script
+local CONFIG = {
+	AdminUserIds = {}, -- put numeric userIds here to grant admin rights, e.g. {123456, 987654}
+	DefaultInventorySlots = 3,
+	DefaultDamage = 10,
+	DefaultHeal = 10,
+}
+
 -- Load modules
 local HealthSystem = require(ServerStorage:WaitForChild("Modules"):WaitForChild("HealthSystem"))
 local InventorySystem = require(ServerStorage:WaitForChild("Modules"):WaitForChild("InventorySystem"))
@@ -33,6 +41,8 @@ local LevelSystem = require(ServerStorage:WaitForChild("Modules"):WaitForChild("
 local playerSystems = {}
 
 -- Create required events in ReplicatedStorage
+local admins = CONFIG.AdminUserIds
+
 local function setupEvents()
 	local events = ReplicatedStorage:FindFirstChild("Events") or Instance.new("Folder")
 	events.Name = "Events"
@@ -75,7 +85,7 @@ local function setupEvents()
 	end
 
 	-- Numeric settings
-	local nums = {InventorySlots = 3, DefaultDamage = 10, DefaultHeal = 10, LevelExpBase = 100}
+	local nums = {InventorySlots = CONFIG.DefaultInventorySlots, DefaultDamage = CONFIG.DefaultDamage, DefaultHeal = CONFIG.DefaultHeal, LevelExpBase = 100}
 	for name, default in pairs(nums) do
 		if not settings:FindFirstChild(name) then
 			local v = Instance.new("IntValue")
@@ -98,11 +108,16 @@ local function setupPlayer(player)
 	systems.dataManager = dataManager
 	
 	-- Create HealthSystem
+	local settings = ReplicatedStorage:FindFirstChild("Settings")
+	local slots = (settings and settings:FindFirstChild("InventorySlots") and settings.InventorySlots.Value) or CONFIG.DefaultInventorySlots
+	local defaultDamage = (settings and settings:FindFirstChild("DefaultDamage") and settings.DefaultDamage.Value) or CONFIG.DefaultDamage
+	local defaultHeal = (settings and settings:FindFirstChild("DefaultHeal") and settings.DefaultHeal.Value) or CONFIG.DefaultHeal
+
 	local health = HealthSystem.new(player, 100)
 	systems.health = health
 	
 	-- Create InventorySystem
-	local inventory = InventorySystem.new(player, 20)
+	local inventory = InventorySystem.new(player, slots)
 	if dataManager.data.inventory then
 		inventory:deserialize(dataManager.data.inventory)
 	end
@@ -140,7 +155,6 @@ local function setupRemoteHandlers()
 	local events = ReplicatedStorage:WaitForChild("Events")
 
 	-- Admin handler (only allow game creator or listed admins)
-	local admins = {}
 	local function isAdmin(player)
 		if not player then return false end
 		if player.UserId == game.CreatorId then return true end
@@ -158,6 +172,29 @@ local function setupRemoteHandlers()
 		elseif systemName == "Leveling" and settings:FindFirstChild("LevelingEnabled") then
 			settings.LevelingEnabled.Value = enabled
 		end
+
+		-- optional per-player toggle: if enabled is table {value = bool, userId = id}
+		if type(enabled) == "table" and enabled.userId then
+			local per = settings:FindFirstChild("PerPlayer")
+			if not per then
+				per = Instance.new("Folder")
+				per.Name = "PerPlayer"
+				per.Parent = settings
+			end
+			local pid = per:FindFirstChild(tostring(enabled.userId))
+			if not pid then
+				pid = Instance.new("Folder")
+				pid.Name = tostring(enabled.userId)
+				pid.Parent = per
+			end
+			local v = pid:FindFirstChild(systemName.."Enabled")
+			if not v then
+				v = Instance.new("BoolValue")
+				v.Name = systemName.."Enabled"
+				v.Parent = pid
+			end
+			v.Value = enabled.value
+		end
 		print("Admin " .. player.Name .. " set " .. tostring(systemName) .. " to " .. tostring(enabled))
 	end)
 
@@ -171,6 +208,17 @@ local function setupRemoteHandlers()
 			obj.Value = tonumber(value) or obj.Value
 			print("Admin " .. player.Name .. " set " .. key .. " to " .. tostring(obj.Value))
 		end
+	end)
+
+	-- Admin set admins list (comma-separated ids)
+	events.AdminSetAdmins.OnServerEvent:Connect(function(player, csv)
+		if not isAdmin(player) then return end
+		admins = {}
+		for id in string.gmatch(csv or "", "([^,%s]+)") do
+			local n = tonumber(id)
+			if n then table.insert(admins, n) end
+		end
+		print("Admin list updated by " .. player.Name)
 	end)
 
 	-- Admin actions like damage/heal/level
