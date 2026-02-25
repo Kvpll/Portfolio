@@ -45,7 +45,9 @@ local function setupEvents()
 		"InventoryUpdated",
 		"PlayerDataUpdated",
 		"LevelUp",
-		"AdminToggle"
+		"AdminToggle",
+		"AdminSetValue",
+		"AdminAction"
 	}
 
 	for _, eventName in ipairs(eventNames) do
@@ -61,6 +63,7 @@ local function setupEvents()
 	settings.Name = "Settings"
 	settings.Parent = ReplicatedStorage
 
+	-- Bool toggles
 	local bools = {HealthEnabled = true, InventoryEnabled = true, LevelingEnabled = true}
 	for name, default in pairs(bools) do
 		if not settings:FindFirstChild(name) then
@@ -68,6 +71,17 @@ local function setupEvents()
 			b.Name = name
 			b.Value = default
 			b.Parent = settings
+		end
+	end
+
+	-- Numeric settings
+	local nums = {InventorySlots = 3, DefaultDamage = 10, DefaultHeal = 10, LevelExpBase = 100}
+	for name, default in pairs(nums) do
+		if not settings:FindFirstChild(name) then
+			local v = Instance.new("IntValue")
+			v.Name = name
+			v.Value = default
+			v.Parent = settings
 		end
 	end
 end
@@ -125,12 +139,11 @@ end
 local function setupRemoteHandlers()
 	local events = ReplicatedStorage:WaitForChild("Events")
 
-	-- Admin toggle handler (only allow game creator or listed admins)
+	-- Admin handler (only allow game creator or listed admins)
 	local admins = {}
 	local function isAdmin(player)
 		if not player then return false end
 		if player.UserId == game.CreatorId then return true end
-		-- add admin UserIds to the `admins` table if needed
 		return table.find(admins, player.UserId) ~= nil
 	end
 
@@ -138,14 +151,45 @@ local function setupRemoteHandlers()
 		if not isAdmin(player) then return end
 		local settings = ReplicatedStorage:FindFirstChild("Settings")
 		if not settings then return end
-		if systemName == "Health" then
+		if systemName == "Health" and settings:FindFirstChild("HealthEnabled") then
 			settings.HealthEnabled.Value = enabled
-		elseif systemName == "Inventory" then
+		elseif systemName == "Inventory" and settings:FindFirstChild("InventoryEnabled") then
 			settings.InventoryEnabled.Value = enabled
-		elseif systemName == "Leveling" then
+		elseif systemName == "Leveling" and settings:FindFirstChild("LevelingEnabled") then
 			settings.LevelingEnabled.Value = enabled
 		end
 		print("Admin " .. player.Name .. " set " .. tostring(systemName) .. " to " .. tostring(enabled))
+	end)
+
+	-- Admin set numeric value
+	events.AdminSetValue.OnServerEvent:Connect(function(player, key, value)
+		if not isAdmin(player) then return end
+		local settings = ReplicatedStorage:FindFirstChild("Settings")
+		if not settings then return end
+		local obj = settings:FindFirstChild(key)
+		if obj and (obj:IsA("IntValue") or obj:IsA("NumberValue")) then
+			obj.Value = tonumber(value) or obj.Value
+			print("Admin " .. player.Name .. " set " .. key .. " to " .. tostring(obj.Value))
+		end
+	end)
+
+	-- Admin actions like damage/heal/level
+	events.AdminAction.OnServerEvent:Connect(function(player, action, targetName, amount)
+		if not isAdmin(player) then return end
+		local target = Players:FindFirstChild(targetName) or Players:GetPlayerByUserId(tonumber(targetName) or 0)
+		if not target then return end
+		local systems = playerSystems[target.UserId]
+		if not systems then return end
+		amount = tonumber(amount) or 0
+		if action == "Damage" and systems.health then
+			systems.health:takeDamage(amount, "Admin")
+		elseif action == "Heal" and systems.health then
+			systems.health:heal(amount)
+		elseif action == "SetLevel" and systems.dataManager then
+			systems.dataManager.data.level = math.max(1, math.floor(amount))
+			systems.dataManager.isDirty = true
+			systems.dataManager:notify()
+		end
 	end)
 end
 

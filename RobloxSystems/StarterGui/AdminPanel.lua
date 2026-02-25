@@ -94,3 +94,71 @@ end
 
 -- initial refresh
 refresh()
+
+-- Extra controls: numeric settings and admin actions
+local function createLabel(text, parent, y)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(0, 200, 0, 24)
+    lbl.Position = UDim2.new(0, 10, 0, y)
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(200,200,200)
+    lbl.BackgroundTransparency = 1
+    lbl.Font = Enum.Font.SourceSans
+    lbl.TextSize = 14
+    lbl.Parent = parent
+    return lbl
+end
+
+local function createInput(default, parent, y)
+    local inp = Instance.new("TextBox")
+    inp.Size = UDim2.new(0, 120, 0, 28)
+    inp.Position = UDim2.new(0, 90, 0, y)
+    inp.Text = tostring(default)
+    inp.TextColor3 = Color3.fromRGB(0,0,0)
+    inp.BackgroundColor3 = Color3.fromRGB(240,240,240)
+    inp.Parent = parent
+    return inp
+end
+
+-- Inventory slots control
+local invLabel = createLabel("Inventory Slots:", frame, 140)
+local invInput = createInput(3, frame, 140)
+local invSet = createButton("Set Slots", frame, 170)
+invSet.MouseButton1Click:Connect(function()
+    local v = tonumber(invInput.Text) or 3
+    ReplicatedStorage:WaitForChild("Events"):WaitForChild("AdminSetValue"):FireServer("InventorySlots", math.max(1, math.floor(v)))
+end)
+
+-- Damage/Heal controls
+local dmgLabel = createLabel("Damage:", frame, 210)
+local dmgInput = createInput(10, frame, 210)
+local dmgBtn = createButton("Damage Player", frame, 240)
+
+local healLabel = createLabel("Heal:", frame, 280)
+local healInput = createInput(10, frame, 280)
+local healBtn = createButton("Heal Player", frame, 310)
+
+local targetLabel = createLabel("Target (name or id):", frame, 350)
+local targetInput = createInput("", frame, 350)
+
+dmgBtn.MouseButton1Click:Connect(function()
+    local amount = tonumber(dmgInput.Text) or 0
+    local target = targetInput.Text
+    ReplicatedStorage:WaitForChild("Events"):WaitForChild("AdminAction"):FireServer("Damage", target, amount)
+end)
+
+healBtn.MouseButton1Click:Connect(function()
+    local amount = tonumber(healInput.Text) or 0
+    local target = targetInput.Text
+    ReplicatedStorage:WaitForChild("Events"):WaitForChild("AdminAction"):FireServer("Heal", target, amount)
+end)
+
+-- Level control
+local lvlLabel = createLabel("Set Level:", frame, 390)
+local lvlInput = createInput(1, frame, 390)
+local lvlBtn = createButton("Set Level", frame, 420)
+lvlBtn.MouseButton1Click:Connect(function()
+    local amount = tonumber(lvlInput.Text) or 1
+    local target = targetInput.Text
+    ReplicatedStorage:WaitForChild("Events"):WaitForChild("AdminAction"):FireServer("SetLevel", target, amount)
+end)
